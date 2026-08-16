@@ -209,22 +209,14 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         else if (cpl <= 200) { classification = "Mistake"; icon = "?"; }
         else { classification = "Blunder"; icon = "??"; }
 
+        // Ensure this is the ONLY push command in the loop
         analysisData.push({
             move_number: moveNumber,
             san: move.san,
             fen: evalBoard.fen(),
             cpl: cpl,
             classification: classification,
-            icon: icon, // ♟️ Pushing the icon into our data array
-            commentary: "" 
-        });
-
-        analysisData.push({
-            move_number: moveNumber,
-            san: move.san,
-            fen: evalBoard.fen(),
-            cpl: cpl,
-            classification: classification,
+            icon: icon, // Pushing the icon into our data array
             commentary: "" 
         });
 
