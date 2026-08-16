@@ -3,7 +3,10 @@ let currentMoveIndex = -1;
 let analysisData = [];
 
 // stockfish declaration
-const engine = new Worker('stockfish-18.js');
+// CDN Web Worker 
+const workerCode = `importScripts('https://cdn.jsdelivr.net/npm/stockfish/stockfish-18.js');`;
+const blob = new Blob([workerCode], { type: 'application/javascript' });
+const engine = new Worker(URL.createObjectURL(blob));
 engine.onmessage = function(event){
     console.log("Stockfish: ", event.data);
 }
