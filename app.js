@@ -113,7 +113,9 @@ function renderAnalysisList() {
 
         let htmlContent = `
             <div class="flex justify-between items-center">
-                <span class="font-semibold text-lg">Move ${moveData.move_number}: ${moveData.san}</span>
+                <span class="font-semibold text-lg">
+                    Move ${moveData.move_number}: ${moveData.san} <span class="${colorClass} ml-1 font-bold">${moveData.icon}</span>
+                </span>
                 <span class="${colorClass}">${moveData.classification} (CPL: ${moveData.cpl})</span>
             </div>
         `;
@@ -198,11 +200,24 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         const cpl = Math.max(0, rawCpl);
 
         let classification = "Good";
-        if (cpl <= 10) classification = "Best Move";
-        else if (cpl <= 30) classification = "Excellent";
-        else if (cpl <= 80) classification = "Inaccuracy";
-        else if (cpl <= 200) classification = "Mistake";
-        else classification = "Blunder";
+        let icon = ""; // New icon variable
+
+        // Assigning standard chess annotation symbols
+        if (cpl <= 10) { classification = "Best Move"; icon = "★"; }
+        else if (cpl <= 30) { classification = "Excellent"; icon = "✓"; }
+        else if (cpl <= 80) { classification = "Inaccuracy"; icon = "?!"; }
+        else if (cpl <= 200) { classification = "Mistake"; icon = "?"; }
+        else { classification = "Blunder"; icon = "??"; }
+
+        analysisData.push({
+            move_number: moveNumber,
+            san: move.san,
+            fen: evalBoard.fen(),
+            cpl: cpl,
+            classification: classification,
+            icon: icon, // ♟️ Pushing the icon into our data array
+            commentary: "" 
+        });
 
         analysisData.push({
             move_number: moveNumber,
