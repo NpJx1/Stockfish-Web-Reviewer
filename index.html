@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Reviewer Pro</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Left Side: Controls & Visual Board -->
+        <div class="space-y-6">
+            <!-- Controls Card -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h1 class="text-2xl font-bold mb-4">Chess AI Reviewer</h1>
+                
+                <input type="password" id="geminiKey" placeholder="Gemini API Key (Optional for AI notes)" class="p-2 mb-3 rounded bg-gray-700 text-white w-full border border-gray-600 focus:outline-none text-sm">
+
+                <div class="flex space-x-2 mb-3">
+                    <input type="text" id="username" placeholder="Username" class="p-2 rounded bg-gray-700 text-white w-full border border-gray-600 focus:outline-none">
+                    <input type="text" id="year" placeholder="YYYY" class="p-2 rounded bg-gray-700 text-white w-24 border border-gray-600 focus:outline-none">
+                    <input type="text" id="month" placeholder="MM" class="p-2 rounded bg-gray-700 text-white w-20 border border-gray-600 focus:outline-none">
+                    <button id="fetchGamesBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold transition whitespace-nowrap">Load Games</button>
+                </div>
+
+                <!-- Game Selection Dropdown (Hidden until games are loaded) -->
+                <div id="gameSelectorContainer" class="hidden space-y-2">
+                    <select id="gameSelect" class="p-2 rounded bg-gray-700 text-white w-full border border-gray-600 focus:outline-none"></select>
+                    <button id="analyzeBtn" class="bg-green-600 hover:bg-green-700 w-full py-2 rounded font-semibold transition">Analyze Selected Game</button>
+                </div>
+
+                <p id="statusMsg" class="text-sm text-gray-400 mt-2"></p>
+            </div>
+            
+            <!-- Board Card -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div id="board" class="w-full max-w-md mx-auto"></div>
+                <div class="flex justify-center space-x-4 mt-4">
+                    <button id="prevBtn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Previous</button>
+                    <button id="nextBtn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Next</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Analysis Output -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Analysis Timeline</h2>
+            <div id="analysisPanel" class="space-y-4">
+                <p class="text-gray-400 text-sm">Enter your Chess.com details and click Load Games.</p>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Mac system files
+.DS_Store
+
+# Editor directories
+.vscode/stockfish-18.wasm
