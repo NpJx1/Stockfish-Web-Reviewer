@@ -3,8 +3,8 @@ let currentMoveIndex = -1;
 let analysisData = [];
 
 // stockfish declaration
-// CDN Web Worker 
-const workerCode = `importScripts('https://cdn.jsdelivr.net/npm/stockfish/stockfish-18.js');`;
+// The CORRECTED CDN Web Worker Trick
+const workerCode = `importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`;
 const blob = new Blob([workerCode], { type: 'application/javascript' });
 const engine = new Worker(URL.createObjectURL(blob));
 engine.onmessage = function(event){
