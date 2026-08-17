@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
 
     // The data we are sending to Groq
     const postData = JSON.stringify({
-        model: "llama3-8b-8192", 
+        model: "llama-3.1-8b-instant", // NEWLY UPDATED ACTIVE MODEL
         messages: [
             { 
                 role: "system", 
