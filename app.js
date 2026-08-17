@@ -108,25 +108,60 @@ function renderAnalysisList() {
         if(moveData.classification === "Blunder") colorClass = "text-red-500 font-bold";
         if(moveData.classification === "Mistake") colorClass = "text-orange-400";
 
-        moveDiv.className = "p-3 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition";
-        moveDiv.onclick = () => jumpToMove(index);
-
+        moveDiv.className = "p-3 bg-gray-700 rounded transition flex flex-col";
+        
+        // The clickable top row (jumps to the move)
         let htmlContent = `
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center cursor-pointer hover:bg-gray-600 p-2 rounded" onclick="jumpToMove(${index})">
                 <span class="font-semibold text-lg">
                     Move ${moveData.move_number}: ${moveData.san} <span class="${colorClass} ml-1 font-bold">${moveData.icon}</span>
                 </span>
                 <span class="${colorClass}">${moveData.classification} (CPL: ${moveData.cpl})</span>
             </div>
+            
+            <div class="mt-2 text-sm text-blue-200 border-l-2 border-blue-500 pl-2 hidden" id="commentary-${index}">
+                </div>
+            
+            <button class="mt-2 text-xs text-gray-400 hover:text-white text-left underline" onclick="fetchExplanation(${index})">
+                Ask AI Coach why
+            </button>
         `;
-
-        if(moveData.commentary) {
-            htmlContent += `<p class="mt-2 text-sm text-blue-200 border-l-2 border-blue-500 pl-2">${moveData.commentary}</p>`;
-        }
 
         moveDiv.innerHTML = htmlContent;
         panel.appendChild(moveDiv);
     });
+}
+
+// ♟️ The new function to talk to your secure Vercel backend
+async function fetchExplanation(index) {
+    const moveData = analysisData[index];
+    const commentaryBox = document.getElementById(`commentary-${index}`);
+    
+    // Show loading state
+    commentaryBox.classList.remove('hidden');
+    commentaryBox.innerText = "Groq is thinking...";
+
+    try {
+        const response = await fetch('/api/explain', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                san: moveData.san,
+                fen: moveData.fen,
+                classification: moveData.classification
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            commentaryBox.innerText = data.explanation;
+        } else {
+            commentaryBox.innerText = `Error: ${data.error}`;
+        }
+    } catch (error) {
+        commentaryBox.innerText = "Failed to connect to the AI Coach.";
+    }
 }
 
 // Injects custom inline SVG icons directly over the chessboard squares
