@@ -20,7 +20,7 @@
         <div class="space-y-6 lg:col-span-3">
             
             <div class="bg-gray-800 p-4 rounded-lg shadow-lg"> 
-                <h1 class="text-2xl font-bold mb-4">Chess AI Reviewer</h1>
+                <h1 class="text-2xl font-bold mb-4">Chess Game Reviewer with Stockfish</h1>
 
                 <div class="flex space-x-2 mb-2">
                     <input type="text" id="username" placeholder="Username" class="px-2 py-1 rounded bg-gray-700 text-white w-full border border-gray-600 focus:outline-none text-sm">
@@ -28,6 +28,8 @@
                     <input type="text" id="month" placeholder="MM" class="px-2 py-1 rounded bg-gray-700 text-white w-16 border border-gray-600 focus:outline-none text-sm">
                     <button id="fetchGamesBtn" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 text-sm rounded font-semibold transition whitespace-nowrap">Load Games</button>
                 </div>
+
+                <p class="text-xs text-gray-400 mb-4">Enter your Chess.com username, and the month as well as year of the games you'd like to analyze from .</p>
 
                 <div id="gameSelectorContainer" class="hidden space-y-2">
                     <select id="gameSelect" class="p-2 rounded bg-gray-700 text-white w-full border border-gray-600 focus:outline-none text-sm"></select>
