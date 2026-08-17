@@ -45,7 +45,6 @@ document.getElementById('fetchGamesBtn').addEventListener('click', async () => {
             }
         });
 
-        // Edge Case Handling: Check HTTP status before attempting to parse JSON
         if (!response.ok) {
             if (response.status === 404) {
                 throw new Error("404 Not Found: Ensure the username is correct and games exist for this month.");
@@ -55,7 +54,6 @@ document.getElementById('fetchGamesBtn').addEventListener('click', async () => {
             throw new Error(`Request failed with status ${response.status}`);
         }
 
-        // Edge Case Handling: Catch malformed JSON if API returns an unexpected HTML error page
         let data;
         try {
             data = await response.json();
@@ -87,7 +85,6 @@ document.getElementById('fetchGamesBtn').addEventListener('click', async () => {
         statusMsg.innerText = `Found ${games.length} games. Select one to analyze.`;
 
     } catch (error) {
-        // Edge Case Handling: Catch network failures (e.g., user loses internet connection)
         if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
             statusMsg.innerText = "Error: Network failure. Please check your internet connection.";
         } else {
@@ -126,40 +123,35 @@ function renderAnalysisList() {
     });
 }
 
-const aiMascotContainer = document.getElementById('aiMascotContainer');
-const aiBubble = document.getElementById('aiBubble');
-const aiPrompt = document.getElementById('aiPrompt');
-const aiExplanation = document.getElementById('aiExplanation');
-const mascotMoveNumber = document.getElementById('mascotMoveNumber');
-const mascotIcon = document.getElementById('mascotIcon');
-const mascotDot = document.getElementById('mascotDot');
+// ==========================================
+// 🐈 3-PHASE CAT MASCOT LOGIC
+// ==========================================
+const catContainer = document.getElementById('catContainer');
+const catImg = document.getElementById('catImg');
+const catBubble = document.getElementById('catBubble');
+const catPrompt = document.getElementById('catPrompt');
+const catExplanation = document.getElementById('catExplanation');
+const catMoveNumber = document.getElementById('catMoveNumber');
 
-// 1. Toggle bubble open/close when clicking the Mascot
-mascotIcon.addEventListener('click', () => {
-    if (aiBubble.classList.contains('hidden')) {
-        aiBubble.classList.remove('hidden');
-        // If we haven't asked for an explanation yet, ensure the prompt is visible
-        if (aiExplanation.classList.contains('hidden')) {
-            aiPrompt.classList.remove('hidden');
-        }
-    } else {
-        aiBubble.classList.add('hidden');
-    }
+// 🎨 Placeholders for your future digital art
+const CAT_IDLE_IMG = "https://api.dicebear.com/7.x/fun-emoji/svg?seed=sleepy";
+const CAT_REACT_IMG = "https://api.dicebear.com/7.x/fun-emoji/svg?seed=surprised";
+const CAT_EXPLAIN_IMG = "https://api.dicebear.com/7.x/fun-emoji/svg?seed=smart";
+
+// "No" button puts the cat back to sleep
+document.getElementById('catNoBtn').addEventListener('click', () => {
+    catBubble.classList.add('hidden');
+    catImg.src = CAT_IDLE_IMG; // Back to Phase 1
 });
 
-// 2. "No thanks" button
-document.getElementById('mascotNoBtn').addEventListener('click', () => {
-    aiBubble.classList.add('hidden');
-    mascotDot.classList.add('hidden'); // Clear the notification dot
-});
+// "Yes" button triggers the API and moves to Phase 3
+document.getElementById('catYesBtn').addEventListener('click', async () => {
+    catPrompt.classList.add('hidden');
+    catExplanation.classList.remove('hidden');
+    catExplanation.innerText = "*yawns* Let me look...";
+    
+    catImg.src = CAT_EXPLAIN_IMG; // Phase 3: Explaining Art
 
-// 3. "Yes, explain it" button (Triggers Vercel Backend)
-document.getElementById('mascotYesBtn').addEventListener('click', async () => {
-    aiPrompt.classList.add('hidden');
-    aiExplanation.classList.remove('hidden');
-    aiExplanation.innerText = "Coach is thinking...";
-
-    // Grab the data for whatever move the user is currently looking at
     const moveData = analysisData[currentMoveIndex];
 
     try {
@@ -174,21 +166,19 @@ document.getElementById('mascotYesBtn').addEventListener('click', async () => {
         });
 
         const data = await response.json();
-
         if (response.ok) {
-            aiExplanation.innerText = data.explanation;
-            mascotDot.classList.add('hidden'); // Clear the dot since it was answered
+            catExplanation.innerText = data.explanation;
         } else {
-            aiExplanation.innerText = `Error: ${data.error}`;
+            catExplanation.innerText = `Error: ${data.error}`;
         }
     } catch (error) {
-        aiExplanation.innerText = "Failed to connect to the AI Coach.";
+        catExplanation.innerText = "Connection lost. Back to sleep.";
     }
 });
 
+
 // Injects custom inline SVG icons directly over the chessboard squares
 function drawBoardIcon(moveData) {
-    // Clear old icons
     document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
 
     if (!moveData || !moveData.to) return;
@@ -196,7 +186,6 @@ function drawBoardIcon(moveData) {
     let svg = '';
     let colorClass = '';
 
-    // Assign SVG path and Tailwind color based on classification
     if (moveData.classification === "Best Move") {
         colorClass = "bg-green-500";
         svg = `<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.536a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />`;
@@ -213,17 +202,15 @@ function drawBoardIcon(moveData) {
         colorClass = "bg-red-600";
         svg = `<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />`;
     } else {
-        return; // Good moves do not get an icon
+        return; 
     }
 
-    // Target the specific square DOM element generated by chessboard.js
     const squareEl = document.querySelector(`.square-${moveData.to}`);
     if (squareEl) {
-        squareEl.style.position = 'relative'; // Ensure absolute positioning anchors to this square
+        squareEl.style.position = 'relative'; 
         const iconDiv = document.createElement('div');
         iconDiv.className = 'eval-overlay-icon';
         
-        // CSS forces the icon to float top-right over the piece image
         iconDiv.innerHTML = `
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" 
                  class="w-5 h-5 sm:w-6 sm:h-6 ${colorClass} rounded-full p-1 shadow-lg border-2 border-white"
@@ -235,30 +222,31 @@ function drawBoardIcon(moveData) {
     }
 }
 
+// ♟️ Updated to include the new Cat State logic!
 function jumpToMove(index) {
     if(index < 0 || index >= analysisData.length) return;
     currentMoveIndex = index;
     board.position(analysisData[index].fen);
     
-    // Draw the new icon on the board
     drawBoardIcon(analysisData[index]); 
 
-    // ♟️ UPDATE THE MASCOT STATE
+    // 🐈 UPDATE THE CAT STATE
     const moveData = analysisData[index];
+    catContainer.classList.remove('hidden'); 
+    catExplanation.classList.add('hidden'); 
     
-    aiMascotContainer.classList.remove('hidden'); // Ensure mascot is on screen
-    aiBubble.classList.add('hidden'); // Close the bubble when moving to a new turn
-    aiPrompt.classList.remove('hidden'); // Reset text back to Yes/No
-    aiExplanation.classList.add('hidden'); // Hide the previous move's explanation
-    
-    // Tell the HTML what move number we are looking at
-    mascotMoveNumber.innerText = moveData.move_number;
+    catMoveNumber.innerText = moveData.move_number;
 
-    // Trigger the Red Notification Dot if the move was bad!
-    if (["Blunder", "Mistake", "Inaccuracy"].includes(moveData.classification)) {
-        mascotDot.classList.remove('hidden');
+    // Determine Phase 1 (Idle) vs Phase 2 (Reactive)
+    if (["Blunder", "Mistake", "Best Move"].includes(moveData.classification)) {
+        // Phase 2: Wake up and ask if they want an explanation
+        catImg.src = CAT_REACT_IMG; 
+        catPrompt.classList.remove('hidden');
+        catBubble.classList.remove('hidden');
     } else {
-        mascotDot.classList.add('hidden');
+        // Phase 1: Normal move, keep sleeping
+        catImg.src = CAT_IDLE_IMG;
+        catBubble.classList.add('hidden');
     }
 }
 
@@ -270,7 +258,6 @@ document.getElementById('prevBtn').addEventListener('click', () => {
         currentMoveIndex = -1; 
         board.start(); 
         
-        // Wipe all icons if user resets to the starting position
         document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
     }
 });
@@ -284,7 +271,6 @@ function evaluatePosition(fen){
     return new Promise((resolve) => {
         let currentScore = 0;
         
-        // Failsafe Timeout: Prevent infinite hang if Web Worker drops messages
         const timeoutId = setTimeout(() => {
             resolve(currentScore);
         }, 5000);
@@ -301,7 +287,7 @@ function evaluatePosition(fen){
                 currentScore = parseInt(mateMatch[1], 10) * 10000;
             }
             if (line.includes("bestmove")){
-                clearTimeout(timeoutId); // Clear timeout if engine responds correctly
+                clearTimeout(timeoutId); 
                 resolve(currentScore);
             }
         };
@@ -314,45 +300,35 @@ function evaluatePosition(fen){
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const pgnText = document.getElementById('gameSelect').value;
 
-    // 1. Guard Clause: Stop immediately if no game is selected
     if (!pgnText) {
         alert("Please load and select a game first.");
         return;
     }
 
-    // 2. Load the game into memory ONCE
     const game = new Chess();
     game.load_pgn(pgnText);
 
-    // 3. EXTRACT DATA: Pull the player names directly from the PGN headers
     const whitePlayer = game.header().White || "Unknown";
     const blackPlayer = game.header().Black || "Unknown";
 
-    // 4. IDENTIFY USER: Get the username the person typed into the login box
     const searchedUser = document.getElementById('username').value.trim().toLowerCase();
 
-    // 5. TARGET DOM: Grab our empty HTML placeholders by their IDs
     const topPlayerDiv = document.getElementById('topPlayer');
     const bottomPlayerDiv = document.getElementById('bottomPlayer');
 
-    // 6. THE LOGIC: Figure out who sits at the bottom of the screen
     if (searchedUser === blackPlayer.toLowerCase()) {
-        // The user played Black! Flip the board so they are at the bottom.
         board.orientation('black'); 
         bottomPlayerDiv.innerText = `♟️ Black: ${blackPlayer}`;
         topPlayerDiv.innerText = `♙ White: ${whitePlayer}`;
     } else {
-        // The user played White (or is just observing). Keep standard orientation.
         board.orientation('white'); 
         bottomPlayerDiv.innerText = `♙ White: ${whitePlayer}`;
         topPlayerDiv.innerText = `♟️ Black: ${blackPlayer}`;
     }
 
-    // 7. REVEAL: Remove the Tailwind 'hidden' class so the boxes appear on screen
     topPlayerDiv.classList.remove('hidden');
     bottomPlayerDiv.classList.remove('hidden');
 
-    // 8. Prepare for Analysis
     document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.innerText = "Analyzing game with WebAssembly Stockfish... This may take a minute.";
@@ -361,7 +337,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const evalBoard = new Chess();
     analysisData = [];
 
-    // 9. The Analysis Loop
     for (let i = 0; i < history.length; i++) {
         const move = history[i];
         const moveNumber = i + 1;
@@ -371,7 +346,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
         let scoreAfter = 0;
         
-        // The Terminal Position Bypass
         if (evalBoard.in_checkmate()) {
             scoreAfter = -10000; 
         } else if (evalBoard.in_draw() || evalBoard.in_stalemate() || evalBoard.in_threefold_repetition()) {
@@ -386,7 +360,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         let classification = "Good";
         let icon = ""; 
 
-        // Assigning standard chess annotation symbols
         if (cpl <= 10) { classification = "Best Move"; icon = "★"; }
         else if (cpl <= 30) { classification = "Excellent"; icon = "✓"; }
         else if (cpl <= 80) { classification = "Inaccuracy"; icon = "?!"; }
@@ -409,19 +382,16 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
     statusMsg.innerText = `Analysis Complete! Processed ${history.length} moves.`;
     
-    // Ensure the board resets to the correct perspective after analysis
     board.start();
     currentMoveIndex = -1;
     renderAnalysisList();
 });
 
 document.addEventListener('keydown', (event) => {
-    // Defensive move: Don't flip the board if the user is typing in an input box
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') {
         return; 
     }
 
-    // Trigger the Next/Prev button clicks automatically
     if (event.key === 'ArrowLeft') {
         document.getElementById('prevBtn').click();
     } else if (event.key === 'ArrowRight') {

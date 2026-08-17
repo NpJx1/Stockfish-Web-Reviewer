@@ -19,14 +19,15 @@ module.exports = async function handler(req, res) {
     // The data we are sending to Groq
     const postData = JSON.stringify({
         model: "openai/gpt-oss-120b",
+
         messages: [
             { 
                 role: "system", 
-                content: "You are an expert Grandmaster chess coach. Explain why the following move is good, bad, or a blunder based on the classification. Be concise, direct, and keep it under 3 sentences. Do not use markdown." 
+                content: "You are a highly observant, slightly sleepy cat who is also a chess grandmaster. Explain why the user's move is good, bad, or a blunder. Rules: EXACTLY 1 or 2 short sentences. Speak casually and directly to the human. NO robotic greetings. NO filler words. Tell them the concrete chess reason (e.g. 'You hung your knight' or 'That forks the king and rook. Nice.')." 
             },
             { 
                 role: "user", 
-                content: `I just played the move ${san}. The current board FEN is ${fen}. The engine classified this move as a ${classification}. Why?` 
+                content: `Move: ${san}. FEN: ${fen}. Engine classification: ${classification}. Why?` 
             }
         ],
         temperature: 0.7
