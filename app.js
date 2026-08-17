@@ -108,23 +108,17 @@ function renderAnalysisList() {
         if(moveData.classification === "Blunder") colorClass = "text-red-500 font-bold";
         if(moveData.classification === "Mistake") colorClass = "text-orange-400";
 
-        moveDiv.className = "p-3 bg-gray-700 rounded transition flex flex-col";
-        
-        // The clickable top row (jumps to the move)
+        // Clicking the row simply jumps to the move now
+        moveDiv.className = "p-3 bg-gray-700 rounded transition cursor-pointer hover:bg-gray-600";
+        moveDiv.onclick = () => jumpToMove(index);
+
         let htmlContent = `
-            <div class="flex justify-between items-center cursor-pointer hover:bg-gray-600 p-2 rounded" onclick="jumpToMove(${index})">
+            <div class="flex justify-between items-center">
                 <span class="font-semibold text-lg">
                     Move ${moveData.move_number}: ${moveData.san} <span class="${colorClass} ml-1 font-bold">${moveData.icon}</span>
                 </span>
                 <span class="${colorClass}">${moveData.classification} (CPL: ${moveData.cpl})</span>
             </div>
-            
-            <div class="mt-2 text-sm text-blue-200 border-l-2 border-blue-500 pl-2 hidden" id="commentary-${index}">
-                </div>
-            
-            <button class="mt-2 text-xs text-gray-400 hover:text-white text-left underline" onclick="fetchExplanation(${index})">
-                Ask AI Coach why
-            </button>
         `;
 
         moveDiv.innerHTML = htmlContent;
@@ -132,14 +126,41 @@ function renderAnalysisList() {
     });
 }
 
-// ♟️ The new function to talk to your secure Vercel backend
-async function fetchExplanation(index) {
-    const moveData = analysisData[index];
-    const commentaryBox = document.getElementById(`commentary-${index}`);
-    
-    // Show loading state
-    commentaryBox.classList.remove('hidden');
-    commentaryBox.innerText = "Groq is thinking...";
+const aiMascotContainer = document.getElementById('aiMascotContainer');
+const aiBubble = document.getElementById('aiBubble');
+const aiPrompt = document.getElementById('aiPrompt');
+const aiExplanation = document.getElementById('aiExplanation');
+const mascotMoveNumber = document.getElementById('mascotMoveNumber');
+const mascotIcon = document.getElementById('mascotIcon');
+const mascotDot = document.getElementById('mascotDot');
+
+// 1. Toggle bubble open/close when clicking the Mascot
+mascotIcon.addEventListener('click', () => {
+    if (aiBubble.classList.contains('hidden')) {
+        aiBubble.classList.remove('hidden');
+        // If we haven't asked for an explanation yet, ensure the prompt is visible
+        if (aiExplanation.classList.contains('hidden')) {
+            aiPrompt.classList.remove('hidden');
+        }
+    } else {
+        aiBubble.classList.add('hidden');
+    }
+});
+
+// 2. "No thanks" button
+document.getElementById('mascotNoBtn').addEventListener('click', () => {
+    aiBubble.classList.add('hidden');
+    mascotDot.classList.add('hidden'); // Clear the notification dot
+});
+
+// 3. "Yes, explain it" button (Triggers Vercel Backend)
+document.getElementById('mascotYesBtn').addEventListener('click', async () => {
+    aiPrompt.classList.add('hidden');
+    aiExplanation.classList.remove('hidden');
+    aiExplanation.innerText = "Coach is thinking...";
+
+    // Grab the data for whatever move the user is currently looking at
+    const moveData = analysisData[currentMoveIndex];
 
     try {
         const response = await fetch('/api/explain', {
@@ -155,14 +176,15 @@ async function fetchExplanation(index) {
         const data = await response.json();
 
         if (response.ok) {
-            commentaryBox.innerText = data.explanation;
+            aiExplanation.innerText = data.explanation;
+            mascotDot.classList.add('hidden'); // Clear the dot since it was answered
         } else {
-            commentaryBox.innerText = `Error: ${data.error}`;
+            aiExplanation.innerText = `Error: ${data.error}`;
         }
     } catch (error) {
-        commentaryBox.innerText = "Failed to connect to the AI Coach.";
+        aiExplanation.innerText = "Failed to connect to the AI Coach.";
     }
-}
+});
 
 // Injects custom inline SVG icons directly over the chessboard squares
 function drawBoardIcon(moveData) {
@@ -220,6 +242,24 @@ function jumpToMove(index) {
     
     // Draw the new icon on the board
     drawBoardIcon(analysisData[index]); 
+
+    // ♟️ UPDATE THE MASCOT STATE
+    const moveData = analysisData[index];
+    
+    aiMascotContainer.classList.remove('hidden'); // Ensure mascot is on screen
+    aiBubble.classList.add('hidden'); // Close the bubble when moving to a new turn
+    aiPrompt.classList.remove('hidden'); // Reset text back to Yes/No
+    aiExplanation.classList.add('hidden'); // Hide the previous move's explanation
+    
+    // Tell the HTML what move number we are looking at
+    mascotMoveNumber.innerText = moveData.move_number;
+
+    // Trigger the Red Notification Dot if the move was bad!
+    if (["Blunder", "Mistake", "Inaccuracy"].includes(moveData.classification)) {
+        mascotDot.classList.remove('hidden');
+    } else {
+        mascotDot.classList.add('hidden');
+    }
 }
 
 document.getElementById('prevBtn').addEventListener('click', () => {
