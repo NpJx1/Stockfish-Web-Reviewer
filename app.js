@@ -208,6 +208,11 @@ document.getElementById('nextBtn').addEventListener('click', () => {
 function evaluatePosition(fen){
     return new Promise((resolve) => {
         let currentScore = 0;
+        
+        // Failsafe Timeout: Prevent infinite hang if Web Worker drops messages
+        const timeoutId = setTimeout(() => {
+            resolve(currentScore);
+        }, 5000);
 
         engine.onmessage = function(event){
             const line = event.data;
@@ -221,6 +226,7 @@ function evaluatePosition(fen){
                 currentScore = parseInt(mateMatch[1], 10) * 10000;
             }
             if (line.includes("bestmove")){
+                clearTimeout(timeoutId); // Clear timeout if engine responds correctly
                 resolve(currentScore);
             }
         };
@@ -255,9 +261,19 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         const move = history[i];
         const moveNumber = i + 1;
 
-        const scoreBefore = await evaluatePosition(evalBoard.fen());
+    const scoreBefore = await evaluatePosition(evalBoard.fen());
         evalBoard.move(move);
-        const scoreAfter = await evaluatePosition(evalBoard.fen());
+
+        let scoreAfter = 0;
+        
+        // The Terminal Position Bypass
+        if (evalBoard.in_checkmate()) {
+            scoreAfter = -10000; // The side to move just got checkmated
+        } else if (evalBoard.in_draw() || evalBoard.in_stalemate() || evalBoard.in_threefold_repetition()) {
+            scoreAfter = 0; // The game is a dead draw
+        } else {
+            scoreAfter = await evaluatePosition(evalBoard.fen()); // Normal position
+        }
 
         const rawCpl = scoreBefore + scoreAfter;
         const cpl = Math.max(0, rawCpl);
