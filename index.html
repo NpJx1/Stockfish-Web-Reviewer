@@ -29,7 +29,7 @@
                     <button id="fetchGamesBtn" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 text-sm rounded font-semibold transition whitespace-nowrap">Load Games</button>
                 </div>
 
-                <p class="text-xs text-gray-400 mb-4">Enter your Chess.com username, and the month as well as year of the games you'd like to analyze from .</p>
+                <p class="text-xs text-gray-400 mb-4">Enter your Chess.com username, and the month as well as year of the games you'd like to analyze.</p>
 
                 <div id="gameSelectorContainer" class="hidden space-y-2">
                     <select id="gameSelect" class="p-2 rounded bg-gray-700 text-white w-full border border-gray-600 focus:outline-none text-sm"></select>
@@ -40,9 +40,18 @@
             </div>
             
             <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                
+                <div id="topPlayer" class="w-full max-w-xl mx-auto mb-2 text-gray-300 font-bold bg-gray-700 px-3 py-1 rounded hidden">
+                    Top Player (Waiting...)
+                </div>
+
                 <div id="board" class="w-full max-w-xl mx-auto"></div>
                 
-                <div class="flex justify-center space-x-4 mt-4">
+                <div id="bottomPlayer" class="w-full max-w-xl mx-auto mt-2 text-gray-300 font-bold bg-gray-700 px-3 py-1 rounded hidden">
+                    Bottom Player (Waiting...)
+                </div>
+                
+                <div class="flex justify-center space-x-4 mt-6">
                     <button id="prevBtn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Previous</button>
                     <button id="nextBtn" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded transition">Next</button>
                 </div>

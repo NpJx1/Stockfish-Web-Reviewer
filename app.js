@@ -239,40 +239,70 @@ function evaluatePosition(fen){
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const pgnText = document.getElementById('gameSelect').value;
 
+    // 1. Guard Clause: Stop immediately if no game is selected
     if (!pgnText) {
         alert("Please load and select a game first.");
         return;
     }
 
-    // Clear board icons before analyzing a new game
-    document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
+    // 2. Load the game into memory ONCE
+    const game = new Chess();
+    game.load_pgn(pgnText);
 
+    // 3. EXTRACT DATA: Pull the player names directly from the PGN headers
+    const whitePlayer = game.header().White || "Unknown";
+    const blackPlayer = game.header().Black || "Unknown";
+
+    // 4. IDENTIFY USER: Get the username the person typed into the login box
+    const searchedUser = document.getElementById('username').value.trim().toLowerCase();
+
+    // 5. TARGET DOM: Grab our empty HTML placeholders by their IDs
+    const topPlayerDiv = document.getElementById('topPlayer');
+    const bottomPlayerDiv = document.getElementById('bottomPlayer');
+
+    // 6. THE LOGIC: Figure out who sits at the bottom of the screen
+    if (searchedUser === blackPlayer.toLowerCase()) {
+        // The user played Black! Flip the board so they are at the bottom.
+        board.orientation('black'); 
+        bottomPlayerDiv.innerText = `♟️ Black: ${blackPlayer}`;
+        topPlayerDiv.innerText = `♙ White: ${whitePlayer}`;
+    } else {
+        // The user played White (or is just observing). Keep standard orientation.
+        board.orientation('white'); 
+        bottomPlayerDiv.innerText = `♙ White: ${whitePlayer}`;
+        topPlayerDiv.innerText = `♟️ Black: ${blackPlayer}`;
+    }
+
+    // 7. REVEAL: Remove the Tailwind 'hidden' class so the boxes appear on screen
+    topPlayerDiv.classList.remove('hidden');
+    bottomPlayerDiv.classList.remove('hidden');
+
+    // 8. Prepare for Analysis
+    document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.innerText = "Analyzing game with WebAssembly Stockfish... This may take a minute.";
 
-    const game = new Chess();
-    game.load_pgn(pgnText);
     const history = game.history({ verbose: true });
-
     const evalBoard = new Chess();
     analysisData = [];
 
+    // 9. The Analysis Loop
     for (let i = 0; i < history.length; i++) {
         const move = history[i];
         const moveNumber = i + 1;
 
-    const scoreBefore = await evaluatePosition(evalBoard.fen());
+        const scoreBefore = await evaluatePosition(evalBoard.fen());
         evalBoard.move(move);
 
         let scoreAfter = 0;
         
         // The Terminal Position Bypass
         if (evalBoard.in_checkmate()) {
-            scoreAfter = -10000; // The side to move just got checkmated
+            scoreAfter = -10000; 
         } else if (evalBoard.in_draw() || evalBoard.in_stalemate() || evalBoard.in_threefold_repetition()) {
-            scoreAfter = 0; // The game is a dead draw
+            scoreAfter = 0; 
         } else {
-            scoreAfter = await evaluatePosition(evalBoard.fen()); // Normal position
+            scoreAfter = await evaluatePosition(evalBoard.fen()); 
         }
 
         const rawCpl = scoreBefore + scoreAfter;
@@ -288,7 +318,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         else if (cpl <= 200) { classification = "Mistake"; icon = "?"; }
         else { classification = "Blunder"; icon = "??"; }
 
-        // We capture move.to here so the board knows where to draw the SVG!
         analysisData.push({
             move_number: moveNumber,
             san: move.san,
@@ -304,6 +333,8 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     }
 
     statusMsg.innerText = `Analysis Complete! Processed ${history.length} moves.`;
+    
+    // Ensure the board resets to the correct perspective after analysis
     board.start();
     currentMoveIndex = -1;
     renderAnalysisList();
