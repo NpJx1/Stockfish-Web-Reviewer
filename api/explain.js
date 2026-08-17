@@ -1,7 +1,7 @@
 // api/explain.js
-// This runs securely on Vercel's backend, completely hidden from the user.
+// This runs securely on Vercel's Node.js backend, completely hidden from the user.
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: "llama3-8b-8192", // You can change this to llama3-70b-8192 if you want smarter (but slightly slower) logic
+                model: "llama3-8b-8192", 
                 messages: [
                     { 
                         role: "system", 
