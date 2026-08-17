@@ -308,3 +308,17 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     currentMoveIndex = -1;
     renderAnalysisList();
 });
+
+document.addEventListener('keydown', (event) => {
+    // Defensive move: Don't flip the board if the user is typing in an input box
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') {
+        return; 
+    }
+
+    // Trigger the Next/Prev button clicks automatically
+    if (event.key === 'ArrowLeft') {
+        document.getElementById('prevBtn').click();
+    } else if (event.key === 'ArrowRight') {
+        document.getElementById('nextBtn').click();
+    }
+});
