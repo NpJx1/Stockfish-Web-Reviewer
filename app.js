@@ -123,34 +123,44 @@ function renderAnalysisList() {
     });
 }
 
-// ==========================================
-// 🐈 3-PHASE CAT MASCOT LOGIC
-// ==========================================
-const catContainer = document.getElementById('catContainer');
-const catImg = document.getElementById('catImg');
-const catBubble = document.getElementById('catBubble');
-const catPrompt = document.getElementById('catPrompt');
-const catExplanation = document.getElementById('catExplanation');
-const catMoveNumber = document.getElementById('catMoveNumber');
+// three phase fish logic
+const fishContainer = document.getElementById('fishContainer');
+const fishImg = document.getElementById('fishImg');
+const fishBubble = document.getElementById('fishBubble');
+const fishPrompt = document.getElementById('fishPrompt');
+const fishExplanation = document.getElementById('fishExplanation');
+const fishMoveNumber = document.getElementById('fishMoveNumber');
+const fishClickArea = document.getElementById('fishClickArea');
 
-// 🎨 Placeholders for your future digital art
-const CAT_IDLE_IMG = "https://api.dicebear.com/7.x/fun-emoji/svg?seed=sleepy";
-const CAT_REACT_IMG = "https://api.dicebear.com/7.x/fun-emoji/svg?seed=surprised";
-const CAT_EXPLAIN_IMG = "https://api.dicebear.com/7.x/fun-emoji/svg?seed=smart";
+// Placeholders for your future digital art
+const FISH_IDLE_IMG = "https://api.dicebear.com/7.x/shapes/svg?seed=fish-idle";
+const FISH_REACT_IMG = "https://api.dicebear.com/7.x/shapes/svg?seed=fish-react";
+const FISH_EXPLAIN_IMG = "https://api.dicebear.com/7.x/shapes/svg?seed=fish-explain";
 
-// "No" button puts the cat back to sleep
-document.getElementById('catNoBtn').addEventListener('click', () => {
-    catBubble.classList.add('hidden');
-    catImg.src = CAT_IDLE_IMG; // Back to Phase 1
+// NEW WAKE-UP LOGIC: Click the floating fish to manually trigger Phase 2
+fishClickArea.addEventListener('click', () => {
+    // Only wake the fish if the bubble is currently hidden
+    if (fishBubble.classList.contains('hidden')) {
+        fishImg.src = FISH_REACT_IMG;             // Phase 2: Wake up image
+        fishBubble.classList.remove('hidden');   // Reveal the bubble
+        fishPrompt.classList.remove('hidden');   // Show the Yes/No question
+        fishExplanation.classList.add('hidden'); // Hide any previous text
+    }
+});
+
+// "No" button puts the fish back to idle
+document.getElementById('fishNoBtn').addEventListener('click', () => {
+    fishBubble.classList.add('hidden');
+    fishImg.src = FISH_IDLE_IMG; // Back to Phase 1
 });
 
 // "Yes" button triggers the API and moves to Phase 3
-document.getElementById('catYesBtn').addEventListener('click', async () => {
-    catPrompt.classList.add('hidden');
-    catExplanation.classList.remove('hidden');
-    catExplanation.innerText = "*yawns* Let me look...";
+document.getElementById('fishYesBtn').addEventListener('click', async () => {
+    fishPrompt.classList.add('hidden');
+    fishExplanation.classList.remove('hidden');
+    fishExplanation.innerText = "*blub blub* Let me look...";
     
-    catImg.src = CAT_EXPLAIN_IMG; // Phase 3: Explaining Art
+    fishImg.src = FISH_EXPLAIN_IMG; // Phase 3: Explaining Art
 
     const moveData = analysisData[currentMoveIndex];
 
@@ -167,12 +177,12 @@ document.getElementById('catYesBtn').addEventListener('click', async () => {
 
         const data = await response.json();
         if (response.ok) {
-            catExplanation.innerText = data.explanation;
+            fishExplanation.innerText = data.explanation;
         } else {
-            catExplanation.innerText = `Error: ${data.error}`;
+            fishExplanation.innerText = `Error: ${data.error}`;
         }
     } catch (error) {
-        catExplanation.innerText = "Connection lost. Back to sleep.";
+        fishExplanation.innerText = "Connection lost. Swimming away.";
     }
 });
 
@@ -222,7 +232,7 @@ function drawBoardIcon(moveData) {
     }
 }
 
-// ♟️ Updated to include the new Cat State logic!
+// Updated to include the new Fish State logic
 function jumpToMove(index) {
     if(index < 0 || index >= analysisData.length) return;
     currentMoveIndex = index;
@@ -230,23 +240,23 @@ function jumpToMove(index) {
     
     drawBoardIcon(analysisData[index]); 
 
-    // 🐈 UPDATE THE CAT STATE
+    // UPDATE THE FISH STATE
     const moveData = analysisData[index];
-    catContainer.classList.remove('hidden'); 
-    catExplanation.classList.add('hidden'); 
+    fishContainer.classList.remove('hidden'); 
+    fishExplanation.classList.add('hidden'); 
     
-    catMoveNumber.innerText = moveData.move_number;
+    fishMoveNumber.innerText = moveData.move_number;
 
     // Determine Phase 1 (Idle) vs Phase 2 (Reactive)
     if (["Blunder", "Mistake", "Best Move"].includes(moveData.classification)) {
         // Phase 2: Wake up and ask if they want an explanation
-        catImg.src = CAT_REACT_IMG; 
-        catPrompt.classList.remove('hidden');
-        catBubble.classList.remove('hidden');
+        fishImg.src = FISH_REACT_IMG; 
+        fishPrompt.classList.remove('hidden');
+        fishBubble.classList.remove('hidden');
     } else {
-        // Phase 1: Normal move, keep sleeping
-        catImg.src = CAT_IDLE_IMG;
-        catBubble.classList.add('hidden');
+        // Phase 1: Normal move, stay idle
+        fishImg.src = FISH_IDLE_IMG;
+        fishBubble.classList.add('hidden');
     }
 }
 
@@ -278,11 +288,11 @@ function evaluatePosition(fen){
         engine.onmessage = function(event){
             const line = event.data;
 
-            const cpMatch = line.match(/score cp (-?\d+)/);
+            const cpMatch = line.match(/score cp (-?\\d+)/);
             if (cpMatch){
                 currentScore = parseInt(cpMatch[1], 10);
             }
-            const mateMatch = line.match(/score mate (-?\d+)/);
+            const mateMatch = line.match(/score mate (-?\\d+)/);
             if (mateMatch){
                 currentScore = parseInt(mateMatch[1], 10) * 10000;
             }
@@ -318,12 +328,12 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
     if (searchedUser === blackPlayer.toLowerCase()) {
         board.orientation('black'); 
-        bottomPlayerDiv.innerText = `♟️ Black: ${blackPlayer}`;
-        topPlayerDiv.innerText = `♙ White: ${whitePlayer}`;
+        bottomPlayerDiv.innerText = `Black: ${blackPlayer}`;
+        topPlayerDiv.innerText = `White: ${whitePlayer}`;
     } else {
         board.orientation('white'); 
-        bottomPlayerDiv.innerText = `♙ White: ${whitePlayer}`;
-        topPlayerDiv.innerText = `♟️ Black: ${blackPlayer}`;
+        bottomPlayerDiv.innerText = `White: ${whitePlayer}`;
+        topPlayerDiv.innerText = `Black: ${blackPlayer}`;
     }
 
     topPlayerDiv.classList.remove('hidden');
@@ -360,8 +370,8 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         let classification = "Good";
         let icon = ""; 
 
-        if (cpl <= 10) { classification = "Best Move"; icon = "★"; }
-        else if (cpl <= 30) { classification = "Excellent"; icon = "✓"; }
+        if (cpl <= 10) { classification = "Best Move"; icon = "Best"; }
+        else if (cpl <= 30) { classification = "Excellent"; icon = "Good"; }
         else if (cpl <= 80) { classification = "Inaccuracy"; icon = "?!"; }
         else if (cpl <= 200) { classification = "Mistake"; icon = "?"; }
         else { classification = "Blunder"; icon = "??"; }

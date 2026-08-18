@@ -61,23 +61,23 @@
         <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-h-[85vh] flex flex-col lg:col-span-2">
             <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Analysis Timeline</h2>
             
-            <div id="catContainer" class="flex items-start space-x-4 mb-6 p-4 bg-gray-700 rounded-lg hidden">
-                <div class="w-20 h-20 flex-shrink-0 transition-transform hover:scale-105" id="catClickArea">
-                    <img id="catImg" src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=sleepy" alt="Chess Cat" class="w-full h-full object-contain">
+        <div id="fishContainer" class="flex items-start space-x-4 mb-6 p-4 bg-gray-700 rounded-lg hidden">
+                <div class="w-20 h-20 flex-shrink-0 transition-transform hover:scale-105" id="fishClickArea">
+                    <img id="fishImg" src="https://api.dicebear.com/7.x/shapes/svg?seed=fish-idle" alt="Stockfish Mascot" class="w-full h-full object-contain">
                 </div>
                 
-                <div id="catBubble" class="hidden flex-1 bg-gray-800 border border-gray-600 rounded-xl p-3 shadow-lg relative">
+                <div id="fishBubble" class="hidden flex-1 bg-gray-800 border border-gray-600 rounded-xl p-3 shadow-lg relative">
                     <div class="absolute w-3 h-3 bg-gray-800 border-l border-b border-gray-600 transform rotate-45 -left-1.5 top-4"></div>
                     
-                    <div id="catPrompt" class="text-sm">
-                        <p class="mb-2 font-semibold text-white">Meow... explain Move <span id="catMoveNumber" class="text-blue-400"></span>?</p>
+                    <div id="fishPrompt" class="text-sm">
+                        <p class="mb-2 font-semibold text-white">*Blub...* explain Move <span id="fishMoveNumber" class="text-blue-400"></span>?</p>
                         <div class="flex space-x-2">
-                            <button id="catYesBtn" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded text-xs font-bold transition">Yes</button>
-                            <button id="catNoBtn" class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs transition">No</button>
+                            <button id="fishYesBtn" class="bg-green-600 hover:bg-green-500 text-white px-3 py-1 rounded text-xs font-bold transition">Yes</button>
+                            <button id="fishNoBtn" class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded text-xs transition">No</button>
                         </div>
                     </div>
 
-                    <div id="catExplanation" class="hidden text-sm text-blue-200">
+                    <div id="fishExplanation" class="hidden text-sm text-blue-200">
                         </div>
                 </div>
             </div>
