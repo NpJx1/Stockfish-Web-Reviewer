@@ -3,7 +3,6 @@ let currentMoveIndex = -1;
 let analysisData = [];
 
 // stockfish declaration
-// The CORRECTED CDN Web Worker Trick
 const workerCode = `importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`;
 const blob = new Blob([workerCode], { type: 'application/javascript' });
 const engine = new Worker(URL.createObjectURL(blob));
@@ -20,7 +19,7 @@ $(document).ready(function() {
     });
 });
 
-// Fetch list of games directly from Chess.com API (via local proxy server)
+// Fetch list of games directly from Chess.com API
 document.getElementById('fetchGamesBtn').addEventListener('click', async () => {
     const username = document.getElementById('username').value.trim();
     const year = document.getElementById('year').value.trim();
@@ -105,7 +104,6 @@ function renderAnalysisList() {
         if(moveData.classification === "Blunder") colorClass = "text-red-500 font-bold";
         if(moveData.classification === "Mistake") colorClass = "text-orange-400";
 
-        // Clicking the row simply jumps to the move now
         moveDiv.className = "p-3 bg-gray-700 rounded transition cursor-pointer hover:bg-gray-600";
         moveDiv.onclick = () => jumpToMove(index);
 
@@ -123,7 +121,7 @@ function renderAnalysisList() {
     });
 }
 
-// three phase fish logic
+// Three phase fish logic
 const fishContainer = document.getElementById('fishContainer');
 const fishImg = document.getElementById('fishImg');
 const fishBubble = document.getElementById('fishBubble');
@@ -132,35 +130,34 @@ const fishExplanation = document.getElementById('fishExplanation');
 const fishMoveNumber = document.getElementById('fishMoveNumber');
 const fishClickArea = document.getElementById('fishClickArea');
 
-// art for the fish
-const FISH_IDLE_IMG = "seedream-4.5_b_close_their_eyes.png";
-const FISH_REACT_IMG = "seedream-weq5_b_close_their_eyes.png";
-const FISH_EXPLAIN_IMG = "Untitled design-Photoroom.png";
+// Art files for the fish
+const FISH_IDLE_IMG = "fish-idle.png";
+const FISH_REACT_IMG = "fish-react.png";
+const FISH_EXPLAIN_IMG = "fish-explain.png";
 
-// NEW WAKE-UP LOGIC: Click the floating fish to manually trigger Phase 2
+// Manual wake-up listener
 fishClickArea.addEventListener('click', () => {
-    // Only wake the fish if the bubble is currently hidden
     if (fishBubble.classList.contains('hidden')) {
-        fishImg.src = FISH_REACT_IMG;             // Phase 2: Wake up image
-        fishBubble.classList.remove('hidden');   // Reveal the bubble
-        fishPrompt.classList.remove('hidden');   // Show the Yes/No question
-        fishExplanation.classList.add('hidden'); // Hide any previous text
+        fishImg.src = FISH_REACT_IMG;             
+        fishBubble.classList.remove('hidden');   
+        fishPrompt.classList.remove('hidden');   
+        fishExplanation.classList.add('hidden'); 
     }
 });
 
-// "No" button puts the fish back to idle
+// No button listener
 document.getElementById('fishNoBtn').addEventListener('click', () => {
     fishBubble.classList.add('hidden');
-    fishImg.src = FISH_IDLE_IMG; // Back to Phase 1
+    fishImg.src = FISH_IDLE_IMG; 
 });
 
-// "Yes" button triggers the API and moves to Phase 3
+// Yes button listener
 document.getElementById('fishYesBtn').addEventListener('click', async () => {
     fishPrompt.classList.add('hidden');
     fishExplanation.classList.remove('hidden');
     fishExplanation.innerText = "*blub blub* You woke me up, let me look what you did...";
     
-    fishImg.src = FISH_EXPLAIN_IMG; // Phase 3: Explaining Art
+    fishImg.src = FISH_EXPLAIN_IMG; 
 
     const moveData = analysisData[currentMoveIndex];
 
@@ -187,8 +184,7 @@ document.getElementById('fishYesBtn').addEventListener('click', async () => {
     }
 });
 
-
-// Injects custom inline SVG icons directly over the chessboard squares
+// Board icon generation
 function drawBoardIcon(moveData) {
     document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
 
@@ -233,29 +229,45 @@ function drawBoardIcon(moveData) {
     }
 }
 
-// Updated to include the new Fish State logic
 function jumpToMove(index) {
     if(index < 0 || index >= analysisData.length) return;
+    
     currentMoveIndex = index;
     board.position(analysisData[index].fen);
-    
     drawBoardIcon(analysisData[index]); 
 
-    // UPDATE THE FISH STATE
     const moveData = analysisData[index];
+
+    // EVALUATION METER
+    let score = moveData.evalScore; 
+    let displayScore = (score / 100).toFixed(1); 
+    
+    let clampedScore = Math.max(-1000, Math.min(1000, score));
+    let blackPercent = 50 - (clampedScore / 20); 
+    
+    if (score > 9000) { 
+        blackPercent = 0;
+        displayScore = "M"; 
+    } else if (score < -9000) {
+        blackPercent = 100;
+        displayScore = "M";
+    }
+
+    if (score > 0 && score <= 9000) displayScore = "+" + displayScore;
+
+    document.getElementById('evalBarBlack').style.height = `${blackPercent}%`;
+    document.getElementById('evalScoreText').innerText = displayScore;
+
+    // FISH STATE
     fishContainer.classList.remove('hidden'); 
     fishExplanation.classList.add('hidden'); 
-    
     fishMoveNumber.innerText = moveData.move_number;
 
-    // Determine Phase 1 (Idle) vs Phase 2 (Reactive)
     if (["Blunder", "Mistake", "Best Move"].includes(moveData.classification)) {
-        // Phase 2: Wake up and ask if they want an explanation
         fishImg.src = FISH_REACT_IMG; 
         fishPrompt.classList.remove('hidden');
         fishBubble.classList.remove('hidden');
     } else {
-        // Phase 1: Normal move, stay idle
         fishImg.src = FISH_IDLE_IMG;
         fishBubble.classList.add('hidden');
     }
@@ -270,6 +282,8 @@ document.getElementById('prevBtn').addEventListener('click', () => {
         board.start(); 
         
         document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
+        document.getElementById('evalBarBlack').style.height = "50%";
+        document.getElementById('evalScoreText').innerText = "0.0";
     }
 });
 
@@ -277,7 +291,7 @@ document.getElementById('nextBtn').addEventListener('click', () => {
     if (currentMoveIndex < analysisData.length - 1) jumpToMove(currentMoveIndex + 1);
 });
 
-// Main stockfish analysis loop
+// Stockfish Analysis Loop
 function evaluatePosition(fen){
     return new Promise((resolve) => {
         let currentScore = 0;
@@ -301,7 +315,6 @@ function evaluatePosition(fen){
             if (line.includes("bestmove")){
                 clearTimeout(timeoutId); 
                 
-                // Extract the actual best move string (e.g. "e2e4")
                 const bmMatch = line.match(/bestmove\s+(\S+)/);
                 if(bmMatch) bestMoveStr = bmMatch[1];
                 
@@ -313,7 +326,7 @@ function evaluatePosition(fen){
     });
 }
 
-// main function for analyzing games
+// Master Analysis Execution
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const pgnText = document.getElementById('gameSelect').value;
 
@@ -327,7 +340,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
     const whitePlayer = game.header().White || "Unknown";
     const blackPlayer = game.header().Black || "Unknown";
-
     const searchedUser = document.getElementById('username').value.trim().toLowerCase();
 
     const topPlayerDiv = document.getElementById('topPlayer');
@@ -345,8 +357,9 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
     topPlayerDiv.classList.remove('hidden');
     bottomPlayerDiv.classList.remove('hidden');
-
+    document.getElementById('evalBarContainer').classList.remove('hidden');
     document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
+    
     const statusMsg = document.getElementById('statusMsg');
     statusMsg.innerText = "Analyzing game with WebAssembly Stockfish... This may take a minute.";
 
@@ -358,23 +371,22 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         const move = history[i];
         const moveNumber = i + 1;
 
-      // Grab BOTH the score and the engine's recommended best move
-      const evalDataBefore = await evaluatePosition(evalBoard.fen());
-      const scoreBefore = evalDataBefore.score;
-      const engineBestMove = evalDataBefore.bestMove; 
+        const evalDataBefore = await evaluatePosition(evalBoard.fen());
+        const scoreBefore = evalDataBefore.score;
+        const engineBestMove = evalDataBefore.bestMove; 
 
-      evalBoard.move(move);
+        evalBoard.move(move);
 
-      let scoreAfter = 0;
-      
-      if (evalBoard.in_checkmate()) {
-          scoreAfter = -10000; 
-      } else if (evalBoard.in_draw() || evalBoard.in_stalemate() || evalBoard.in_threefold_repetition()) {
-          scoreAfter = 0; 
-      } else {
-          const evalDataAfter = await evaluatePosition(evalBoard.fen()); 
-          scoreAfter = evalDataAfter.score;
-      }
+        let scoreAfter = 0;
+        
+        if (evalBoard.in_checkmate()) {
+            scoreAfter = -10000; 
+        } else if (evalBoard.in_draw() || evalBoard.in_stalemate() || evalBoard.in_threefold_repetition()) {
+            scoreAfter = 0; 
+        } else {
+            const evalDataAfter = await evaluatePosition(evalBoard.fen()); 
+            scoreAfter = evalDataAfter.score;
+        }
 
         const rawCpl = scoreBefore + scoreAfter;
         const cpl = Math.max(0, rawCpl);
@@ -388,6 +400,8 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         else if (cpl <= 200) { classification = "Mistake"; icon = "?"; }
         else { classification = "Blunder"; icon = "??"; }
 
+        const absoluteScore = evalBoard.turn() === 'w' ? scoreAfter : -scoreAfter;
+
         analysisData.push({
             move_number: moveNumber,
             san: move.san,
@@ -397,6 +411,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
             classification: classification,
             icon: icon, 
             engineBestMove: engineBestMove,
+            evalScore: absoluteScore,
             commentary: "" 
         });
 
@@ -410,6 +425,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     renderAnalysisList();
 });
 
+// Arrow key navigation
 document.addEventListener('keydown', (event) => {
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'SELECT') {
         return; 

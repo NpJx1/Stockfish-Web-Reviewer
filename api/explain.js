@@ -1,10 +1,6 @@
-// api/explain.js
-// Powered by Node's native HTTPS module. Immune to 'fetch' errors and caching issues.
-
 const https = require('https');
 
 module.exports = async function handler(req, res) {
-    // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -16,23 +12,21 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'API key is missing from Vercel settings.' });
     }
 
-    // The data we are sending to Groq
     const postData = JSON.stringify({
-        model: "openai/gpt-oss-120b",
-
-    messages: [
+        model: "mixtral-8x7b-32768", 
+        messages: [
             { 
                 role: "system", 
-                content: "You are a highly observant, wise fish who is also a chess grandmaster. Explain why the user's move is good, bad, or a blunder. Rules: EXACTLY 1 or 2 short sentences. Speak casually and directly to the human. NO robotic greetings. NO filler words. Tell them the concrete chess reason (e.g. 'You hung your knight' or 'That forks the king and rook. Nice.'). You may very occasionally use a subtle ocean or fish-related pun." 
+                content: "You are a highly observant, floating fish who is also a chess grandmaster. Explain why the user's move is good, bad, or a blunder. Rules: EXACTLY 1 or 2 short sentences. Speak casually and directly to the human. NO robotic greetings. NO filler words. Tell them the concrete chess reason. You may occasionally use a subtle ocean or fish-related pun." 
             },
             { 
                 role: "user", 
-                content: `I just played the move ${san}. The current board FEN is ${fen}. Stockfish classified this move as a ${classification}. Stockfish calculated that the actual best move was ${bestMove}. Why was my move bad, and why is the engine's move better?`            }
+                content: `I just played the move ${san}. The current board FEN is ${fen}. Stockfish classified this move as a ${classification}. Stockfish calculated that the actual best move was ${bestMove}. Why was my move bad, and why is the engine's move better?` 
+            }
         ],
         temperature: 0.7
     });
 
-    // The exact routing instructions to reach Groq's servers
     const options = {
         hostname: 'api.groq.com',
         path: '/openai/v1/chat/completions',
@@ -44,17 +38,14 @@ module.exports = async function handler(req, res) {
         }
     };
 
-    // Wrap the old-school HTTPS request in a modern Promise so Vercel waits for it
     return new Promise((resolve) => {
         const request = https.request(options, (response) => {
             let data = '';
 
-            // As Groq streams the response back, combine the chunks
             response.on('data', (chunk) => {
                 data += chunk;
             });
 
-            // When Groq is totally finished talking
             response.on('end', () => {
                 try {
                     const parsedData = JSON.parse(data);
@@ -66,18 +57,16 @@ module.exports = async function handler(req, res) {
                 } catch (error) {
                     res.status(500).json({ error: 'Failed to read Groq API response.' });
                 }
-                resolve(); // Signal to Vercel that the serverless function is complete
+                resolve();
             });
         });
 
-        // If the connection drops completely
         request.on('error', (e) => {
             console.error("Connection Error:", e);
             res.status(500).json({ error: 'Failed to connect to Groq entirely.' });
             resolve();
         });
 
-        // Fire the request!
         request.write(postData);
         request.end();
     });

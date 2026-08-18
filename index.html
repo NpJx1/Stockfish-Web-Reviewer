@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stockfish Chess Reviewer</title>
-    <link rel="icon" type="image/png" href="seedream-weq5_b_close_their_eyes.png">
+    <title>Chess Reviewer Pro</title>
+    
+    <link rel="icon" type="image/png" href="fish-idle.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -45,7 +47,15 @@
                     Top Player (Waiting...)
                 </div>
 
-                <div id="board" class="w-full max-w-xl mx-auto"></div>
+                <div class="flex items-stretch justify-center max-w-xl mx-auto space-x-2">
+                    
+                    <div id="evalBarContainer" class="w-6 sm:w-8 bg-white rounded flex flex-col justify-start overflow-hidden relative shadow-lg hidden border border-gray-600">
+                        <div id="evalBarBlack" class="bg-gray-800 w-full transition-all duration-500 ease-in-out" style="height: 50%;"></div>
+                        <span id="evalScoreText" class="absolute inset-0 flex items-center justify-center text-[10px] sm:text-xs font-bold pointer-events-none mix-blend-difference text-white z-10">0.0</span>
+                    </div>
+
+                    <div id="board" class="flex-1"></div>
+                </div>
                 
                 <div id="bottomPlayer" class="w-full max-w-xl mx-auto mt-2 text-gray-300 font-bold bg-gray-700 px-3 py-1 rounded hidden">
                     Bottom Player (Waiting...)
@@ -59,12 +69,13 @@
         </div>
 
         <div class="bg-gray-800 p-6 rounded-lg shadow-lg max-h-[85vh] flex flex-col lg:col-span-2">
-            <h2 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Analysis Timeline</h2>
-
-            <p class="text-sm text-gray-400 mb-6 italic">Click on any move to jump to that position. Click on GM Fish to wake him up and explain the move!</p>
-        <div id="fishContainer" class="flex items-start space-x-4 mb-6 p-4 bg-gray-700 rounded-lg hidden">
+            <h2 class="text-xl font-bold mb-2 border-b border-gray-700 pb-2">Analysis Timeline</h2>
+            
+            <p class="text-sm text-gray-400 mb-6 italic">Click on any move to jump to that position. Wake up the fish for a grandmaster explanation!</p>
+            
+            <div id="fishContainer" class="flex items-start space-x-4 mb-6 p-4 bg-gray-700 rounded-lg hidden">
                 <div class="w-20 h-20 flex-shrink-0 transition-transform hover:scale-105" id="fishClickArea">
-                    <img id="fishImg" src="https://api.dicebear.com/7.x/shapes/svg?seed=fish-idle" alt="Stockfish Mascot" class="w-full h-full object-contain">
+                    <img id="fishImg" src="fish-idle.png" alt="Stockfish Mascot" class="w-full h-full object-contain">
                 </div>
                 
                 <div id="fishBubble" class="hidden flex-1 bg-gray-800 border border-gray-600 rounded-xl p-3 shadow-lg relative">
@@ -79,7 +90,7 @@
                     </div>
 
                     <div id="fishExplanation" class="hidden text-sm text-blue-200">
-                        </div>
+                    </div>
                 </div>
             </div>
 
