@@ -158,7 +158,7 @@ document.getElementById('fishNoBtn').addEventListener('click', () => {
 document.getElementById('fishYesBtn').addEventListener('click', async () => {
     fishPrompt.classList.add('hidden');
     fishExplanation.classList.remove('hidden');
-    fishExplanation.innerText = "*blub blub* Let me look...";
+    fishExplanation.innerText = "*blub blub* You woke me up, let me look what you did...";
     
     fishImg.src = FISH_EXPLAIN_IMG; // Phase 3: Explaining Art
 
