@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
     }
 
     const postData = JSON.stringify({
-        model: "mixtral-8x7b-32768", 
+        model: "gpt-oss-120b", 
         messages: [
             { 
                 role: "system", 
