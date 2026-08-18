@@ -288,11 +288,12 @@ function evaluatePosition(fen){
         engine.onmessage = function(event){
             const line = event.data;
 
-            const cpMatch = line.match(/score cp (-?\\d+)/);
+            // Fixed: Single backslash for \d to properly match numbers
+            const cpMatch = line.match(/score cp (-?\d+)/);
             if (cpMatch){
                 currentScore = parseInt(cpMatch[1], 10);
             }
-            const mateMatch = line.match(/score mate (-?\\d+)/);
+            const mateMatch = line.match(/score mate (-?\d+)/);
             if (mateMatch){
                 currentScore = parseInt(mateMatch[1], 10) * 10000;
             }
