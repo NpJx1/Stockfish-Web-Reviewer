@@ -131,9 +131,9 @@ const fishMoveNumber = document.getElementById('fishMoveNumber');
 const fishClickArea = document.getElementById('fishClickArea');
 
 // Art files for the fish
-const FISH_IDLE_IMG = "fish-idle.png";
-const FISH_REACT_IMG = "fish-react.png";
-const FISH_EXPLAIN_IMG = "fish-explain.png";
+const FISH_IDLE_IMG = "seedream-4.5_b_close_their_eyes.png";
+const FISH_REACT_IMG = "seedream-weq5_b_close_their_eyes.png";
+const FISH_EXPLAIN_IMG = "Untitled design-Photoroom.png";
 
 // Manual wake-up listener
 fishClickArea.addEventListener('click', () => {

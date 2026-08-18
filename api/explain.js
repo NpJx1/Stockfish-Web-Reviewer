@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
     }
 
     const postData = JSON.stringify({
-        model: "gpt-oss-120b", 
+        model: "openai/gpt-oss-120b", 
         messages: [
             { 
                 role: "system", 
