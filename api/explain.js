@@ -9,7 +9,7 @@ module.exports = async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { san, fen, classification } = req.body;
+    const { san, fen, classification, bestMove } = req.body;
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
@@ -27,8 +27,7 @@ module.exports = async function handler(req, res) {
             },
             { 
                 role: "user", 
-                content: `Move: ${san}. FEN: ${fen}. Engine classification: ${classification}. Why?` 
-            }
+                content: `I just played the move ${san}. The current board FEN is ${fen}. Stockfish classified this move as a ${classification}. Stockfish calculated that the actual best move was ${bestMove}. Why was my move bad, and why is the engine's move better?`            }
         ],
         temperature: 0.7
     });

@@ -132,7 +132,7 @@ const fishExplanation = document.getElementById('fishExplanation');
 const fishMoveNumber = document.getElementById('fishMoveNumber');
 const fishClickArea = document.getElementById('fishClickArea');
 
-// Placeholders for your future digital art
+// art for the fish
 const FISH_IDLE_IMG = "seedream-4.5_b_close_their_eyes.png";
 const FISH_REACT_IMG = "seedream-weq5_b_close_their_eyes.png";
 const FISH_EXPLAIN_IMG = "Untitled design-Photoroom.png";
@@ -171,7 +171,8 @@ document.getElementById('fishYesBtn').addEventListener('click', async () => {
             body: JSON.stringify({
                 san: moveData.san,
                 fen: moveData.fen,
-                classification: moveData.classification
+                classification: moveData.classification,
+                bestMove: moveData.engineBestMove
             })
         });
 
@@ -280,15 +281,15 @@ document.getElementById('nextBtn').addEventListener('click', () => {
 function evaluatePosition(fen){
     return new Promise((resolve) => {
         let currentScore = 0;
+        let bestMoveStr = "Unknown";
         
         const timeoutId = setTimeout(() => {
-            resolve(currentScore);
+            resolve({ score: currentScore, bestMove: bestMoveStr });
         }, 5000);
 
         engine.onmessage = function(event){
             const line = event.data;
 
-            // Fixed: Single backslash for \d to properly match numbers
             const cpMatch = line.match(/score cp (-?\d+)/);
             if (cpMatch){
                 currentScore = parseInt(cpMatch[1], 10);
@@ -299,7 +300,12 @@ function evaluatePosition(fen){
             }
             if (line.includes("bestmove")){
                 clearTimeout(timeoutId); 
-                resolve(currentScore);
+                
+                // Extract the actual best move string (e.g. "e2e4")
+                const bmMatch = line.match(/bestmove\s+(\S+)/);
+                if(bmMatch) bestMoveStr = bmMatch[1];
+                
+                resolve({ score: currentScore, bestMove: bestMoveStr });
             }
         };
         engine.postMessage(`position fen ${fen}`);
@@ -352,18 +358,23 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         const move = history[i];
         const moveNumber = i + 1;
 
-        const scoreBefore = await evaluatePosition(evalBoard.fen());
-        evalBoard.move(move);
+      // Grab BOTH the score and the engine's recommended best move
+      const evalDataBefore = await evaluatePosition(evalBoard.fen());
+      const scoreBefore = evalDataBefore.score;
+      const engineBestMove = evalDataBefore.bestMove; 
 
-        let scoreAfter = 0;
-        
-        if (evalBoard.in_checkmate()) {
-            scoreAfter = -10000; 
-        } else if (evalBoard.in_draw() || evalBoard.in_stalemate() || evalBoard.in_threefold_repetition()) {
-            scoreAfter = 0; 
-        } else {
-            scoreAfter = await evaluatePosition(evalBoard.fen()); 
-        }
+      evalBoard.move(move);
+
+      let scoreAfter = 0;
+      
+      if (evalBoard.in_checkmate()) {
+          scoreAfter = -10000; 
+      } else if (evalBoard.in_draw() || evalBoard.in_stalemate() || evalBoard.in_threefold_repetition()) {
+          scoreAfter = 0; 
+      } else {
+          const evalDataAfter = await evaluatePosition(evalBoard.fen()); 
+          scoreAfter = evalDataAfter.score;
+      }
 
         const rawCpl = scoreBefore + scoreAfter;
         const cpl = Math.max(0, rawCpl);
@@ -385,6 +396,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
             cpl: cpl,
             classification: classification,
             icon: icon, 
+            engineBestMove: engineBestMove,
             commentary: "" 
         });
 
