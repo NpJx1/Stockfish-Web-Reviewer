@@ -133,9 +133,9 @@ const fishMoveNumber = document.getElementById('fishMoveNumber');
 const fishClickArea = document.getElementById('fishClickArea');
 
 // Placeholders for your future digital art
-const FISH_IDLE_IMG = "https://api.dicebear.com/7.x/shapes/svg?seed=fish-idle";
-const FISH_REACT_IMG = "https://api.dicebear.com/7.x/shapes/svg?seed=fish-react";
-const FISH_EXPLAIN_IMG = "https://api.dicebear.com/7.x/shapes/svg?seed=fish-explain";
+const FISH_IDLE_IMG = "seedream-4.5_b_close_their_eyes.png";
+const FISH_REACT_IMG = "seedream-weq5_b_close_their_eyes.png";
+const FISH_EXPLAIN_IMG = "Untitled design-Photoroom.png";
 
 // NEW WAKE-UP LOGIC: Click the floating fish to manually trigger Phase 2
 fishClickArea.addEventListener('click', () => {
