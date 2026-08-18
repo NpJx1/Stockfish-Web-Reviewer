@@ -357,7 +357,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
     topPlayerDiv.classList.remove('hidden');
     bottomPlayerDiv.classList.remove('hidden');
-    document.getElementById('evalBarContainer').classList.remove('hidden');
     document.querySelectorAll('.eval-overlay-icon').forEach(el => el.remove());
     
     const statusMsg = document.getElementById('statusMsg');
